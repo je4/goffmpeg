@@ -2,12 +2,12 @@ package utils
 
 import (
 	"bytes"
+	"github.com/je4/goffmpeg/models"
 	"os/exec"
 	"runtime"
 	"strconv"
 	"strings"
-
-	"github.com/xfrr/goffmpeg/models"
+	"syscall"
 )
 
 func DurToSec(dur string) (sec float64) {
@@ -86,6 +86,11 @@ func TestCmd(command string, args string) (bytes.Buffer, error) {
 
 	err := cmd.Run()
 	if err != nil {
+		exiterror := err.(*exec.ExitError)
+		status, _ := exiterror.Sys().(syscall.WaitStatus)
+		if status.ExitStatus() == 1 {
+			return out, nil
+		}
 		return out, err
 	}
 

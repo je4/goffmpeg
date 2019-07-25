@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/xfrr/goffmpeg/ffmpeg"
-	"github.com/xfrr/goffmpeg/models"
-	"github.com/xfrr/goffmpeg/utils"
+	"github.com/je4/goffmpeg/ffmpeg"
+	"github.com/je4/goffmpeg/models"
+	"github.com/je4/goffmpeg/utils"
 )
 
 // Transcoder Main struct
@@ -97,9 +97,20 @@ func (t *Transcoder) Initialize(inputPath string, outputPath string) error {
 		return errors.New("error on transcoder.Initialize: inputPath missing")
 	}
 
+	cmdBin := cfg.FfprobeBin
 	command := []string{"-i", inputPath, "-print_format", "json", "-show_format", "-show_streams", "-show_error"}
 
-	cmd := exec.Command(cfg.FfprobeBin, command...)
+	if cfg.PrefixCommandBin != "" {
+		cmdBin = cfg.PrefixCommandBin
+		if cfg.PrefixCommandCmdAsOne {
+			command = append(cfg.PrefixCommandParam, strings.Join(append([]string{cfg.FfprobeBin}, command...), " "))
+		} else {
+			command2 := append(cfg.PrefixCommandParam, cfg.FfprobeBin)
+			command = append(command2, command...)
+		}
+	}
+
+	cmd := exec.Command(cmdBin, command...)
 	cmd.Stdout = &out
 
 	err = cmd.Run()
@@ -128,13 +139,25 @@ func (t *Transcoder) Initialize(inputPath string, outputPath string) error {
 // Run Starts the transcoding process
 func (t *Transcoder) Run(progress bool) <-chan error {
 	done := make(chan error)
+
+	cmdBin := t.configuration.FfmpegBin
 	command := t.GetCommand()
+
+	if t.configuration.PrefixCommandBin != "" {
+		cmdBin = t.configuration.PrefixCommandBin
+		if t.configuration.PrefixCommandCmdAsOne {
+			command = append(t.configuration.PrefixCommandParam, strings.Join(append([]string{t.configuration.FfmpegBin}, command...), " "))
+		} else {
+			command2 := append(t.configuration.PrefixCommandParam, t.configuration.FfmpegBin)
+			command = append(command2, command...)
+		}
+	}
 
 	if !progress {
 		command = append([]string{"-nostats", "-loglevel", "0"}, command...)
 	}
 
-	proc := exec.Command(t.configuration.FfmpegBin, command...)
+	proc := exec.Command(cmdBin, command...)
 	if progress {
 		errStream, err := proc.StderrPipe()
 		if err != nil {

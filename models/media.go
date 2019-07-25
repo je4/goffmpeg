@@ -50,6 +50,7 @@ type Mediafile struct {
 	hlsPlaylistType       string
 	hlsListSize           int
 	hlsSegmentDuration    int
+	movFlags              []string // needed for qt-faststart
 	httpMethod            string
 	httpKeepAlive         bool
 	streamIds             map[int]string
@@ -160,6 +161,10 @@ func (m *Mediafile) SetAudioProfile(v string) {
 
 func (m *Mediafile) SetVideoProfile(v string) {
 	m.videoProfile = v
+}
+
+func (m *Mediafile) SetMovFlags(v []string) {
+	m.movFlags = v
 }
 
 func (m *Mediafile) SetDuration(v string) {
@@ -521,6 +526,7 @@ func (m *Mediafile) ToStrCommand() []string {
 		"VideoFilter",
 		"HttpMethod",
 		"HttpKeepAlive",
+		"MovFlags",
 		"OutputPath",
 	}
 	for _, name := range opts {
@@ -826,6 +832,15 @@ func (m *Mediafile) ObtainInputInitialOffset() []string {
 
 func (m *Mediafile) ObtainHlsListSize() []string {
 	return []string{"-hls_list_size", fmt.Sprintf("%d", m.hlsListSize)}
+}
+
+func (m *Mediafile) ObtainMovFlags() []string {
+	if len( m.movFlags ) > 0 {
+		ret := []string{"-movflags"}
+		ret = append(ret, m.movFlags...)
+		return ret
+	}
+	return []string{}
 }
 
 func (m *Mediafile) ObtainHlsSegmentDuration() []string {
