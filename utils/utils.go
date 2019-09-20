@@ -86,10 +86,12 @@ func TestCmd(command string, args string) (bytes.Buffer, error) {
 
 	err := cmd.Run()
 	if err != nil {
-		exiterror := err.(*exec.ExitError)
-		status, _ := exiterror.Sys().(syscall.WaitStatus)
-		if status.ExitStatus() == 1 {
-			return out, nil
+		exiterror, ok := err.(*exec.ExitError)
+		if ok {
+			status, _ := exiterror.Sys().(syscall.WaitStatus)
+			if status.ExitStatus() == 1 {
+				return out, nil
+			}
 		}
 		return out, err
 	}
