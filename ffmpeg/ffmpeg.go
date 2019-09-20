@@ -30,6 +30,10 @@ func PrefixConfigure(ffmpegBin string, ffprobeBin, prefixCommand string, cmdAsPa
 	conf.FfprobeBin = ffprobeBin
 	conf.PrefixCommandCmdAsOne = cmdAsParam
 
+	if !cmdAsParam {
+		return conf, nil
+	}
+
 	// explode command but take care of double quotes
 	r := regexp.MustCompile("'.+'|\".+\"|\\S+")
 	parts := r.FindAllString(prefixCommand, -1)
