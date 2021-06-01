@@ -76,6 +76,4 @@ type Progress struct {
 	Speed           string
 }
 
-type Tags struct {
-	Encoder string `json:"ENCODER"`
-}
+type Tags map[string]string
