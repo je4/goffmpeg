@@ -4,8 +4,8 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 	"io"
 	"os/exec"
 	"regexp"
@@ -15,8 +15,6 @@ import (
 	"github.com/je4/goffmpeg/ffmpeg"
 	"github.com/je4/goffmpeg/models"
 	"github.com/je4/goffmpeg/utils"
-
-	"github.com/goph/emperror"
 )
 
 // Transcoder Main struct
@@ -117,11 +115,11 @@ func (t *Transcoder) Initialize(inputPath string, outputPath string) error {
 
 	err = cmd.Run()
 	if err != nil {
-		return emperror.Wrapf(err, "error executing (%s)", command)
+		return errors.Wrapf(err, "error executing (%s)", command)
 	}
 
 	if err = json.Unmarshal([]byte(out.String()), &Metadata); err != nil {
-		return emperror.Wrapf(err, "cannot unmarshal %s", out.String())
+		return errors.Wrapf(err, "cannot unmarshal %s", out.String())
 	}
 
 	// Set new Mediafile
